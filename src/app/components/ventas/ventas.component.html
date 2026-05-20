@@ -1,0 +1,172 @@
+<!-- ventas.component.html -->
+<div class="ventas-page">
+  <!-- HEADER ACTIONS -->
+  <div class="flex justify-between items-center mb-6">
+    <div class="flex gap-3">
+      <input class="form-control" style="width:240px" placeholder="🔍 Buscar cliente..." [(ngModel)]="busqueda">
+      <select class="form-control" style="width:160px" [(ngModel)]="filtroEstado">
+        <option value="">Todos los estados</option>
+        <option value="completada">Completada</option>
+        <option value="pendiente">Pendiente</option>
+        <option value="cancelada">Cancelada</option>
+      </select>
+    </div>
+    <button class="btn btn-primary" (click)="abrirModal()">＋ Nueva Venta</button>
+  </div>
+
+  <!-- TABLE -->
+  <div class="card">
+    <div class="card-title">Historial de Ventas</div>
+    <div class="table-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Cliente</th>
+            <th>Productos</th>
+            <th>Método Pago</th>
+            <th>Estado</th>
+            <th>Total</th>
+            <th>Fecha</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let v of ventasFiltradas; let i = index">
+            <td class="text-muted">{{ i + 1 }}</td>
+            <td><strong>{{ v.clienteNombre }}</strong></td>
+            <td>
+              <span *ngFor="let p of v.productos; let last = last" class="text-muted">
+                {{ p.productoNombre }} ({{ p.cantidad }}){{ !last ? ', ' : '' }}
+              </span>
+            </td>
+            <td class="text-muted">{{ v.metodoPago | titlecase }}</td>
+            <td>
+              <span class="badge" [ngClass]="{
+                'badge-success': v.estado==='completada',
+                'badge-warning': v.estado==='pendiente',
+                'badge-danger':  v.estado==='cancelada'
+              }">{{ v.estado }}</span>
+            </td>
+            <td class="text-success fw-bold">{{ v.total | currency:'MXN':'symbol':'1.2-2' }}</td>
+            <td class="text-muted">{{ formatFecha(v.fecha) }}</td>
+            <td>
+              <div class="flex gap-2">
+                <button class="btn btn-sm btn-secondary" (click)="verDetalle(v)">Ver</button>
+                <button class="btn btn-sm btn-danger" *ngIf="v.estado!='cancelada'" (click)="cancelarVenta(v)">✕</button>
+              </div>
+            </td>
+          </tr>
+          <tr *ngIf="ventasFiltradas.length === 0">
+            <td colspan="8" class="text-muted" style="text-align:center;padding:32px">Sin ventas registradas.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- MODAL NUEVA VENTA -->
+  <div class="modal-overlay" *ngIf="showModal" (click)="cerrarModal()">
+    <div class="modal" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2>Nueva Venta</h2>
+        <button class="modal-close" (click)="cerrarModal()">✕</button>
+      </div>
+
+      <div class="form-group">
+        <label>Cliente</label>
+        <select class="form-control" [(ngModel)]="form.clienteId" (change)="onClienteChange()">
+          <option value="">Seleccionar cliente...</option>
+          <option *ngFor="let c of clientes" [value]="c.id">{{ c.nombre }} {{ c.apellido }}</option>
+        </select>
+      </div>
+
+      <!-- PRODUCTOS -->
+      <div class="productos-section">
+        <div class="flex justify-between items-center mb-4">
+          <span class="card-title" style="margin-bottom:0">Productos</span>
+          <button class="btn btn-sm btn-secondary" (click)="agregarItem()">+ Agregar</button>
+        </div>
+
+        <div class="item-row" *ngFor="let item of form.productos; let i = index">
+          <select class="form-control" [(ngModel)]="item.productoId" (change)="onProductoChange(i)">
+            <option value="">Seleccionar producto...</option>
+            <option *ngFor="let p of productos" [value]="p.id">{{ p.nombre }} - ${{ p.precioVenta }}</option>
+          </select>
+          <input class="form-control" type="number" min="1" placeholder="Cant." [(ngModel)]="item.cantidad" (change)="calcularTotales()" style="width:80px">
+          <span class="item-subtotal">{{ item.subtotal | currency:'MXN':'symbol':'1.2-2' }}</span>
+          <button class="btn btn-sm btn-danger" (click)="quitarItem(i)">✕</button>
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <div class="form-group">
+          <label>Descuento ($)</label>
+          <input class="form-control" type="number" min="0" [(ngModel)]="form.descuento" (change)="calcularTotales()">
+        </div>
+        <div class="form-group">
+          <label>Método de Pago</label>
+          <select class="form-control" [(ngModel)]="form.metodoPago">
+            <option value="efectivo">Efectivo</option>
+            <option value="tarjeta">Tarjeta</option>
+            <option value="transferencia">Transferencia</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="resumen-venta">
+        <div class="resumen-row"><span>Subtotal</span><span>{{ form.subtotal | currency:'MXN':'symbol':'1.2-2' }}</span></div>
+        <div class="resumen-row"><span>Descuento</span><span class="text-danger">-{{ form.descuento | currency:'MXN':'symbol':'1.2-2' }}</span></div>
+        <div class="resumen-row total"><span>TOTAL</span><span class="text-success">{{ form.total | currency:'MXN':'symbol':'1.2-2' }}</span></div>
+      </div>
+
+      <div class="form-group">
+        <label>Notas (opcional)</label>
+        <input class="form-control" [(ngModel)]="form.notas" placeholder="Observaciones...">
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-secondary" (click)="cerrarModal()">Cancelar</button>
+        <button class="btn btn-primary" (click)="guardarVenta()" [disabled]="guardando">
+          {{ guardando ? 'Guardando...' : '✓ Registrar Venta' }}
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL DETALLE -->
+  <div class="modal-overlay" *ngIf="ventaDetalle" (click)="ventaDetalle=null">
+    <div class="modal" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2>Detalle de Venta</h2>
+        <button class="modal-close" (click)="ventaDetalle=null">✕</button>
+      </div>
+      <div *ngIf="ventaDetalle">
+        <p><strong>Cliente:</strong> {{ ventaDetalle.clienteNombre }}</p>
+        <p><strong>Fecha:</strong> {{ formatFecha(ventaDetalle.fecha) }}</p>
+        <p><strong>Estado:</strong>
+          <span class="badge ml-2" [ngClass]="{'badge-success':ventaDetalle.estado==='completada','badge-danger':ventaDetalle.estado==='cancelada'}">
+            {{ ventaDetalle.estado }}
+          </span>
+        </p>
+        <br>
+        <table style="width:100%">
+          <thead><tr><th>Producto</th><th>Cant.</th><th>Precio</th><th>Subtotal</th></tr></thead>
+          <tbody>
+            <tr *ngFor="let p of ventaDetalle.productos">
+              <td>{{ p.productoNombre }}</td>
+              <td>{{ p.cantidad }}</td>
+              <td>{{ p.precioUnitario | currency:'MXN' }}</td>
+              <td>{{ p.subtotal | currency:'MXN' }}</td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="resumen-venta" style="margin-top:16px">
+          <div class="resumen-row"><span>Subtotal</span><span>{{ ventaDetalle.subtotal | currency:'MXN' }}</span></div>
+          <div class="resumen-row"><span>Descuento</span><span>{{ ventaDetalle.descuento | currency:'MXN' }}</span></div>
+          <div class="resumen-row total"><span>TOTAL</span><span class="text-success">{{ ventaDetalle.total | currency:'MXN' }}</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

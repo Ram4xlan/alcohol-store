@@ -1,0 +1,97 @@
+<!-- clientes.component.html -->
+<div class="clientes-page">
+  <div class="flex justify-between items-center mb-6">
+    <input class="form-control" style="width:280px" placeholder="🔍 Buscar por nombre, email..." [(ngModel)]="busqueda">
+    <button class="btn btn-primary" (click)="abrirModal()">＋ Nuevo Cliente</button>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Clientes Registrados</div>
+    <div class="table-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Nombre</th>
+            <th>Teléfono</th>
+            <th>Email</th>
+            <th>Dirección</th>
+            <th>RFC</th>
+            <th>Estado</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let c of clientesFiltrados; let i = index">
+            <td class="text-muted">{{ i + 1 }}</td>
+            <td><strong>{{ c.nombre }} {{ c.apellido }}</strong></td>
+            <td class="text-muted">{{ c.telefono }}</td>
+            <td class="text-muted">{{ c.email }}</td>
+            <td class="text-muted">{{ c.direccion }}</td>
+            <td class="text-muted">{{ c.rfc || '-' }}</td>
+            <td>
+              <span class="badge" [ngClass]="c.activo ? 'badge-success' : 'badge-danger'">
+                {{ c.activo ? 'Activo' : 'Inactivo' }}
+              </span>
+            </td>
+            <td>
+              <div class="flex gap-2">
+                <button class="btn btn-sm btn-secondary" (click)="editarCliente(c)">Editar</button>
+                <button class="btn btn-sm btn-danger" *ngIf="c.activo" (click)="eliminarCliente(c)">✕</button>
+              </div>
+            </td>
+          </tr>
+          <tr *ngIf="clientesFiltrados.length === 0">
+            <td colspan="8" class="text-muted" style="text-align:center;padding:32px">Sin clientes registrados.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- MODAL -->
+  <div class="modal-overlay" *ngIf="showModal" (click)="cerrarModal()">
+    <div class="modal" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2>{{ editando ? 'Editar Cliente' : 'Nuevo Cliente' }}</h2>
+        <button class="modal-close" (click)="cerrarModal()">✕</button>
+      </div>
+
+      <div class="grid-2">
+        <div class="form-group">
+          <label>Nombre *</label>
+          <input class="form-control" [(ngModel)]="form.nombre" placeholder="Nombre">
+        </div>
+        <div class="form-group">
+          <label>Apellido *</label>
+          <input class="form-control" [(ngModel)]="form.apellido" placeholder="Apellido">
+        </div>
+      </div>
+      <div class="grid-2">
+        <div class="form-group">
+          <label>Teléfono *</label>
+          <input class="form-control" [(ngModel)]="form.telefono" placeholder="55 1234 5678">
+        </div>
+        <div class="form-group">
+          <label>Email</label>
+          <input class="form-control" type="email" [(ngModel)]="form.email" placeholder="correo@ejemplo.com">
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Dirección</label>
+        <input class="form-control" [(ngModel)]="form.direccion" placeholder="Calle, número, colonia">
+      </div>
+      <div class="form-group">
+        <label>RFC (opcional)</label>
+        <input class="form-control" [(ngModel)]="form.rfc" placeholder="XXXX000000XX0" maxlength="13">
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-secondary" (click)="cerrarModal()">Cancelar</button>
+        <button class="btn btn-primary" (click)="guardarCliente()" [disabled]="guardando">
+          {{ guardando ? 'Guardando...' : (editando ? '✓ Actualizar' : '✓ Registrar') }}
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

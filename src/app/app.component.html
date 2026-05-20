@@ -1,0 +1,61 @@
+<!-- app.component.html -->
+<div class="app-shell" [class.sidebar-collapsed]="sidebarCollapsed">
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <span class="brand-icon">🥃</span>
+      <span class="brand-name">LicorPro</span>
+    </div>
+
+    <nav class="sidebar-nav">
+      <a class="nav-item" [class.active]="activeView === 'dashboard'" (click)="setView('dashboard')">
+        <span class="nav-icon">📊</span>
+        <span class="nav-label">Dashboard</span>
+      </a>
+      <a class="nav-item" [class.active]="activeView === 'ventas'" (click)="setView('ventas')">
+        <span class="nav-icon">💰</span>
+        <span class="nav-label">Ventas</span>
+      </a>
+      <a class="nav-item" [class.active]="activeView === 'pedidos'" (click)="setView('pedidos')">
+        <span class="nav-icon">📦</span>
+        <span class="nav-label">Pedidos</span>
+      </a>
+      <a class="nav-item" [class.active]="activeView === 'clientes'" (click)="setView('clientes')">
+        <span class="nav-icon">👥</span>
+        <span class="nav-label">Clientes</span>
+      </a>
+      <a class="nav-item" [class.active]="activeView === 'inventario'" (click)="setView('inventario')">
+        <span class="nav-icon">🗃️</span>
+        <span class="nav-label">Inventario</span>
+      </a>
+      <a class="nav-item" [class.active]="activeView === 'movimientos'" (click)="setView('movimientos')">
+        <span class="nav-icon">🔄</span>
+        <span class="nav-label">Movimientos</span>
+      </a>
+    </nav>
+
+    <button class="sidebar-toggle" (click)="toggleSidebar()">
+      {{ sidebarCollapsed ? '→' : '←' }}
+    </button>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main-content">
+    <header class="topbar">
+      <h1 class="page-title">{{ pageTitles[activeView] }}</h1>
+      <div class="topbar-right">
+        <span class="fecha-actual">{{ fechaHoy }}</span>
+        <div class="user-badge">Admin</div>
+      </div>
+    </header>
+
+    <div class="view-container">
+      <app-dashboard     *ngIf="activeView === 'dashboard'"></app-dashboard>
+      <app-ventas        *ngIf="activeView === 'ventas'"></app-ventas>
+      <app-pedidos       *ngIf="activeView === 'pedidos'"></app-pedidos>
+      <app-clientes      *ngIf="activeView === 'clientes'"></app-clientes>
+      <app-inventario    *ngIf="activeView === 'inventario'"></app-inventario>
+      <app-movimientos   *ngIf="activeView === 'movimientos'"></app-movimientos>
+    </div>
+  </main>
+</div>

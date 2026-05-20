@@ -1,0 +1,124 @@
+<!-- dashboard.component.html -->
+<div class="dashboard">
+  <!-- STATS CARDS -->
+  <div class="grid-4 mb-6" *ngIf="stats">
+    <div class="stat-card">
+      <div class="stat-icon">💰</div>
+      <div class="stat-body">
+        <div class="stat-label">Ventas Hoy</div>
+        <div class="stat-value">{{ stats.totalVentasHoy | currency:'MXN':'symbol':'1.0-0' }}</div>
+        <div class="stat-sub">{{ stats.ventasHoyCount }} transacciones</div>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-icon">👥</div>
+      <div class="stat-body">
+        <div class="stat-label">Clientes</div>
+        <div class="stat-value">{{ stats.totalClientes }}</div>
+        <div class="stat-sub">Activos registrados</div>
+      </div>
+    </div>
+
+    <div class="stat-card" [class.alert-card]="stats.pedidosPendientes > 0">
+      <div class="stat-icon">📦</div>
+      <div class="stat-body">
+        <div class="stat-label">Pedidos Pendientes</div>
+        <div class="stat-value">{{ stats.pedidosPendientes }}</div>
+        <div class="stat-sub">Por recibir</div>
+      </div>
+    </div>
+
+    <div class="stat-card" [class.alert-card]="stats.stockBajo > 0">
+      <div class="stat-icon">⚠️</div>
+      <div class="stat-body">
+        <div class="stat-label">Stock Bajo</div>
+        <div class="stat-value">{{ stats.stockBajo }}</div>
+        <div class="stat-sub">Productos a reponer</div>
+      </div>
+    </div>
+  </div>
+
+  <div *ngIf="!stats" class="loading">Cargando datos del dashboard...</div>
+
+  <!-- CHARTS ROW -->
+  <div class="grid-2 mb-6" *ngIf="stats">
+    <!-- TOP PRODUCTOS -->
+    <div class="card">
+      <div class="card-title">🏆 Top Productos</div>
+      <div class="top-list">
+        <div class="top-item" *ngFor="let p of stats.topProductos; let i = index">
+          <div class="top-rank">#{{ i + 1 }}</div>
+          <div class="top-info">
+            <div class="top-name">{{ p.nombre }}</div>
+            <div class="top-bar-wrap">
+              <div class="top-bar" [style.width.%]="getBarPct(p.total, stats.topProductos)"></div>
+            </div>
+          </div>
+          <div class="top-qty">{{ p.total }} uds.</div>
+        </div>
+        <div *ngIf="stats.topProductos.length === 0" class="text-muted">
+          Sin datos de ventas aún.
+        </div>
+      </div>
+    </div>
+
+    <!-- RESUMEN FINANCIERO -->
+    <div class="card">
+      <div class="card-title">📈 Resumen Financiero</div>
+      <div class="finanzas-list">
+        <div class="finanza-row">
+          <span>Total ventas acumuladas</span>
+          <strong class="text-success">{{ stats.totalVentas | currency:'MXN':'symbol':'1.2-2' }}</strong>
+        </div>
+        <div class="finanza-row">
+          <span>Ventas del día</span>
+          <strong>{{ stats.totalVentasHoy | currency:'MXN':'symbol':'1.2-2' }}</strong>
+        </div>
+        <div class="finanza-row">
+          <span>Pedidos pendientes</span>
+          <strong class="text-warning">{{ stats.pedidosPendientes }}</strong>
+        </div>
+        <div class="finanza-row">
+          <span>Alertas de stock</span>
+          <strong [class.text-danger]="stats.stockBajo > 0">{{ stats.stockBajo }}</strong>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- VENTAS RECIENTES -->
+  <div class="card" *ngIf="ventasRecientes.length > 0">
+    <div class="card-title">🕐 Ventas Recientes</div>
+    <div class="table-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>Cliente</th>
+            <th>Productos</th>
+            <th>Método Pago</th>
+            <th>Estado</th>
+            <th>Total</th>
+            <th>Fecha</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let v of ventasRecientes">
+            <td><strong>{{ v.clienteNombre }}</strong></td>
+            <td>{{ v.productos.length }} artículo(s)</td>
+            <td class="text-muted">{{ v.metodoPago }}</td>
+            <td>
+              <span class="badge" [ngClass]="{
+                'badge-success': v.estado === 'completada',
+                'badge-warning': v.estado === 'pendiente',
+                'badge-danger':  v.estado === 'cancelada'
+              }">{{ v.estado }}</span>
+            </td>
+            <td class="text-success fw-bold">{{ v.total | currency:'MXN':'symbol':'1.2-2' }}</td>
+            <td class="text-muted">{{ formatFecha(v.fecha) }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

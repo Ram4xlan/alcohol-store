@@ -1,0 +1,46 @@
+.item-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.item-subtotal {
+  min-width: 90px;
+  text-align: right;
+  font-weight: 600;
+  color: var(--success);
+}
+
+.productos-section {
+  background: var(--bg-700);
+  border: 1px solid var(--bg-500);
+  border-radius: var(--radius);
+  padding: 14px;
+  margin-bottom: 16px;
+}
+
+.resumen-venta {
+  background: var(--bg-700);
+  border-radius: var(--radius);
+  padding: 14px;
+  margin-bottom: 14px;
+}
+
+.resumen-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 6px 0;
+  font-size: 14px;
+  color: var(--cream-dim);
+  border-bottom: 1px solid var(--bg-600);
+
+  &:last-child { border-bottom: none; }
+
+  &.total {
+    color: var(--cream);
+    font-weight: 700;
+    font-size: 16px;
+    padding-top: 10px;
+  }
+}

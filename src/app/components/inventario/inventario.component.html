@@ -1,0 +1,142 @@
+<!-- inventario.component.html -->
+<div class="inventario-page">
+  <div class="flex justify-between items-center mb-6">
+    <div class="flex gap-3">
+      <input class="form-control" style="width:220px" placeholder="🔍 Buscar producto..." [(ngModel)]="busqueda">
+      <select class="form-control" style="width:160px" [(ngModel)]="filtroCategoria">
+        <option value="">Todas las categorías</option>
+        <option value="cerveza">🍺 Cerveza</option>
+        <option value="vino">🍷 Vino</option>
+        <option value="destilado">🥃 Destilado</option>
+        <option value="licor">🍹 Licor</option>
+        <option value="mixto">🥂 Mixto</option>
+      </select>
+    </div>
+    <button class="btn btn-primary" (click)="abrirModal()">＋ Nuevo Producto</button>
+  </div>
+
+  <!-- ALERTAS STOCK BAJO -->
+  <div class="stock-alert mb-4" *ngIf="productosStockBajo.length > 0">
+    ⚠️ <strong>{{ productosStockBajo.length }}</strong> productos con stock bajo:
+    <span *ngFor="let p of productosStockBajo; let last = last">
+      {{ p.nombre }}{{ !last ? ', ' : '' }}
+    </span>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Inventario de Productos</div>
+    <div class="table-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>Producto</th>
+            <th>Categoría</th>
+            <th>Presentación</th>
+            <th>Proveedor</th>
+            <th>P. Compra</th>
+            <th>P. Venta</th>
+            <th>Stock</th>
+            <th>Stock Mín.</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let p of productosFiltrados" [class.row-alert]="p.stock <= p.stockMinimo">
+            <td>
+              <strong>{{ p.nombre }}</strong>
+              <span class="text-muted" style="display:block;font-size:11px">{{ p.marca }}</span>
+            </td>
+            <td>
+              <span class="badge badge-info">{{ p.categoria }}</span>
+            </td>
+            <td class="text-muted">{{ p.presentacion }}</td>
+            <td class="text-muted">{{ p.proveedor }}</td>
+            <td class="text-muted">{{ p.precioCompra | currency:'MXN' }}</td>
+            <td class="text-success fw-bold">{{ p.precioVenta | currency:'MXN' }}</td>
+            <td [class.text-danger]="p.stock <= p.stockMinimo" [class.fw-bold]="p.stock <= p.stockMinimo">
+              {{ p.stock }}
+            </td>
+            <td class="text-muted">{{ p.stockMinimo }}</td>
+            <td>
+              <div class="flex gap-2">
+                <button class="btn btn-sm btn-secondary" (click)="editarProducto(p)">Editar</button>
+                <button class="btn btn-sm btn-danger" (click)="eliminarProducto(p)">✕</button>
+              </div>
+            </td>
+          </tr>
+          <tr *ngIf="productosFiltrados.length === 0">
+            <td colspan="9" class="text-muted" style="text-align:center;padding:32px">Sin productos en inventario.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- MODAL -->
+  <div class="modal-overlay" *ngIf="showModal" (click)="cerrarModal()">
+    <div class="modal" style="max-width:640px" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2>{{ editando ? 'Editar Producto' : 'Nuevo Producto' }}</h2>
+        <button class="modal-close" (click)="cerrarModal()">✕</button>
+      </div>
+
+      <div class="grid-2">
+        <div class="form-group">
+          <label>Nombre *</label>
+          <input class="form-control" [(ngModel)]="form.nombre" placeholder="Nombre del producto">
+        </div>
+        <div class="form-group">
+          <label>Marca *</label>
+          <input class="form-control" [(ngModel)]="form.marca" placeholder="Marca">
+        </div>
+      </div>
+      <div class="grid-2">
+        <div class="form-group">
+          <label>Categoría *</label>
+          <select class="form-control" [(ngModel)]="form.categoria">
+            <option value="cerveza">🍺 Cerveza</option>
+            <option value="vino">🍷 Vino</option>
+            <option value="destilado">🥃 Destilado</option>
+            <option value="licor">🍹 Licor</option>
+            <option value="mixto">🥂 Mixto</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Presentación</label>
+          <input class="form-control" [(ngModel)]="form.presentacion" placeholder="Ej: 750ml, 6 pack...">
+        </div>
+      </div>
+      <div class="grid-2">
+        <div class="form-group">
+          <label>Precio Compra *</label>
+          <input class="form-control" type="number" min="0" [(ngModel)]="form.precioCompra">
+        </div>
+        <div class="form-group">
+          <label>Precio Venta *</label>
+          <input class="form-control" type="number" min="0" [(ngModel)]="form.precioVenta">
+        </div>
+      </div>
+      <div class="grid-3">
+        <div class="form-group">
+          <label>Stock Actual</label>
+          <input class="form-control" type="number" min="0" [(ngModel)]="form.stock">
+        </div>
+        <div class="form-group">
+          <label>Stock Mínimo</label>
+          <input class="form-control" type="number" min="0" [(ngModel)]="form.stockMinimo">
+        </div>
+        <div class="form-group">
+          <label>Proveedor</label>
+          <input class="form-control" [(ngModel)]="form.proveedor" placeholder="Nombre proveedor">
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-secondary" (click)="cerrarModal()">Cancelar</button>
+        <button class="btn btn-primary" (click)="guardarProducto()" [disabled]="guardando">
+          {{ guardando ? 'Guardando...' : (editando ? '✓ Actualizar' : '✓ Agregar') }}
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

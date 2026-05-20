@@ -1,0 +1,10 @@
+.stock-alert {
+  background: rgba(232,160,32,0.1);
+  border: 1px solid rgba(232,160,32,0.3);
+  border-radius: var(--radius);
+  padding: 12px 16px;
+  color: var(--warning);
+  font-size: 13px;
+}
+
+.row-alert td { background: rgba(217,79,61,0.05); }

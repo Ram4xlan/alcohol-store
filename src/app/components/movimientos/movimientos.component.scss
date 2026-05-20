@@ -1,0 +1,21 @@
+.mov-totals {
+  display: flex;
+  gap: 16px;
+  padding: 16px 20px;
+  border-top: 1px solid var(--bg-500);
+  margin-top: 4px;
+}
+
+.total-chip {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--bg-700);
+  border: 1px solid var(--bg-500);
+  border-radius: var(--radius);
+  padding: 8px 16px;
+  font-size: 13px;
+  color: var(--cream-dim);
+
+  strong { font-size: 16px; }
+}

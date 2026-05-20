@@ -1,0 +1,110 @@
+<!-- pedidos.component.html -->
+<div class="pedidos-page">
+  <div class="flex justify-between items-center mb-6">
+    <select class="form-control" style="width:180px" [(ngModel)]="filtroEstado">
+      <option value="">Todos los estados</option>
+      <option value="pendiente">Pendiente</option>
+      <option value="enviado">Enviado</option>
+      <option value="recibido">Recibido</option>
+      <option value="cancelado">Cancelado</option>
+    </select>
+    <button class="btn btn-primary" (click)="abrirModal()">＋ Nuevo Pedido</button>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Control de Pedidos a Proveedores</div>
+    <div class="table-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Proveedor</th>
+            <th>Productos</th>
+            <th>Total</th>
+            <th>Estado</th>
+            <th>Fecha Pedido</th>
+            <th>Fecha Entrega</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let p of pedidosFiltrados; let i = index">
+            <td class="text-muted">{{ i + 1 }}</td>
+            <td><strong>{{ p.proveedor }}</strong></td>
+            <td>{{ p.productos.length }} producto(s)</td>
+            <td class="fw-bold text-success">{{ p.total | currency:'MXN' }}</td>
+            <td>
+              <span class="badge" [ngClass]="{
+                'badge-warning': p.estado==='pendiente',
+                'badge-info':    p.estado==='enviado',
+                'badge-success': p.estado==='recibido',
+                'badge-danger':  p.estado==='cancelado'
+              }">{{ p.estado }}</span>
+            </td>
+            <td class="text-muted">{{ formatFecha(p.fechaPedido) }}</td>
+            <td class="text-muted">{{ p.fechaEntrega ? formatFecha(p.fechaEntrega) : '-' }}</td>
+            <td>
+              <div class="flex gap-2">
+                <button class="btn btn-sm btn-success" *ngIf="p.estado==='pendiente'" (click)="cambiarEstado(p,'enviado')">Enviado</button>
+                <button class="btn btn-sm btn-success" *ngIf="p.estado==='enviado'" (click)="cambiarEstado(p,'recibido')">Recibido</button>
+                <button class="btn btn-sm btn-danger" *ngIf="p.estado==='pendiente'" (click)="cambiarEstado(p,'cancelado')">✕</button>
+              </div>
+            </td>
+          </tr>
+          <tr *ngIf="pedidosFiltrados.length === 0">
+            <td colspan="8" class="text-muted" style="text-align:center;padding:32px">Sin pedidos registrados.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- MODAL -->
+  <div class="modal-overlay" *ngIf="showModal" (click)="cerrarModal()">
+    <div class="modal" style="max-width:600px" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2>Nuevo Pedido</h2>
+        <button class="modal-close" (click)="cerrarModal()">✕</button>
+      </div>
+
+      <div class="form-group">
+        <label>Proveedor *</label>
+        <input class="form-control" [(ngModel)]="form.proveedor" placeholder="Nombre del proveedor">
+      </div>
+
+      <div class="pedido-items">
+        <div class="flex justify-between items-center mb-4">
+          <span class="card-title" style="margin:0">Productos del Pedido</span>
+          <button class="btn btn-sm btn-secondary" (click)="agregarItem()">+ Agregar</button>
+        </div>
+        <div class="item-row" *ngFor="let item of form.productos; let i = index">
+          <select class="form-control" [(ngModel)]="item.productoId" (change)="onProductoChange(i)">
+            <option value="">Producto...</option>
+            <option *ngFor="let p of productos" [value]="p.id">{{ p.nombre }}</option>
+          </select>
+          <input class="form-control" type="number" min="1" placeholder="Cant." [(ngModel)]="item.cantidad" (change)="calcularTotal()" style="width:80px">
+          <input class="form-control" type="number" min="0" placeholder="Costo" [(ngModel)]="item.costoUnitario" (change)="calcularTotal()" style="width:100px">
+          <span style="min-width:80px;text-align:right;color:var(--success)">{{ item.subtotal | currency:'MXN' }}</span>
+          <button class="btn btn-sm btn-danger" (click)="quitarItem(i)">✕</button>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Notas</label>
+        <input class="form-control" [(ngModel)]="form.notas" placeholder="Observaciones opcionales...">
+      </div>
+
+      <div class="resumen-pedido">
+        <strong>Total del Pedido:</strong>
+        <span class="text-success fw-bold" style="font-size:18px">{{ form.total | currency:'MXN' }}</span>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-secondary" (click)="cerrarModal()">Cancelar</button>
+        <button class="btn btn-primary" (click)="guardarPedido()" [disabled]="guardando">
+          {{ guardando ? 'Guardando...' : '✓ Registrar Pedido' }}
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
