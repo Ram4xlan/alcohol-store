@@ -1,10 +1,10 @@
-# 🥃 LicorPro — Sistema de Gestión de Venta de Alcohol
+#  LicorPro — Sistema de Gestión de Venta de Alcohol
 
 Sistema completo de gestión para tiendas de venta de alcohol, desarrollado con **Angular 17 Standalone + Firebase Firestore**.
 
 ---
 
-## 📁 Estructura del Proyecto
+## Estructura del Proyecto
 
 ```
 src/
@@ -26,7 +26,7 @@ src/
 
 ---
 
-## 🚀 Instalación Paso a Paso
+## Instalación Paso a Paso
 
 ### 1. Prerrequisitos
 ```bash
@@ -61,7 +61,7 @@ npm install
 4. Elige la región más cercana (ej: `us-central1`)
 
 #### C) Obtener credenciales de la app web
-1. En la consola Firebase, clic en el ícono ⚙️ → **Configuración del proyecto**
+1. En la consola Firebase, clic en el ícono → **Configuración del proyecto**
 2. Scroll hacia abajo → **"Tus apps"** → Clic en **"</>"** (Web)
 3. Registra la app con nombre `licor-pro`
 4. Copia las credenciales del objeto `firebaseConfig`
@@ -97,7 +97,7 @@ ng build --configuration production
 
 ---
 
-## 🗄️ Colecciones en Firestore
+## Colecciones en Firestore
 
 El sistema crea automáticamente estas colecciones:
 
@@ -111,7 +111,7 @@ El sistema crea automáticamente estas colecciones:
 
 ---
 
-## ⚙️ Funcionalidades
+##  Funcionalidades
 
 ### Dashboard
 - KPIs en tiempo real: ventas del día, clientes, pedidos pendientes, alertas de stock
@@ -152,7 +152,7 @@ El sistema crea automáticamente estas colecciones:
 
 ---
 
-## 🔒 Seguridad (Producción)
+## Seguridad (Producción)
 
 Antes de publicar, actualiza `firestore.rules` para requerir autenticación:
 
@@ -175,7 +175,7 @@ npm install firebase
 
 ---
 
-## 🛠️ Tecnologías
+##  Tecnologías
 
 - **Angular 17** (Standalone Components, sin módulos)
 - **Firebase 10** (Firestore)
